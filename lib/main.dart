@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'Flutter_Expanded_Text.dart';
+import 'package:flutterhtmlcssexample/Flutter_Exapnded_Text_Max_Height.dart';
+import 'Flutter_Expanded_Text_Max_Lines.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,13 +31,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String htmlContent = """
+  String htmlContent = """<p>This is a test</p>
+<p >So is this</p>
+<p>This is a test</p>
+<p >So is this</p>
+<p>This is a test</p>
+<p>This is a test</p>
 <p>This is a test</p>
 <p >So is this</p>
 <p>This is a test</p>
 <p >So is this</p>
 <p>This is a test</p>
-<p >So is this</p>
+<p>This is a test</p>
+<p>This is a test</p>
 """;
 
   @override
@@ -52,9 +59,20 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Container(
-                child: ExpandableText(htmlContent),
+              Padding(
+                padding: const EdgeInsets.only(top:10.0,bottom: 10),
+                child: Text("Max Line",style: TextStyle(color: Colors.red,fontSize: 15),),
               ),
+              Container(
+                child: ExpandableWithMaxLines(htmlContent),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top:10.0,bottom: 10),
+                child: Text("Max height",style: TextStyle(color: Colors.red,fontSize: 15),),
+              ),
+              Container(
+                child: ExpandableWithMaxHeight(htmlContent),
+              )
             ],
           ),
         ),
