@@ -16,10 +16,42 @@ class ExpandableText extends StatefulWidget {
 }
 
 class ExpandableTextState extends State<ExpandableText> {
-  bool _readMore = true;
+  bool _readMore = true, _toShowReadMore = false;// for onClickLink, for showing button according the value return from checking function
+
+
+  GlobalKey _keyWidget = GlobalKey();//to init into widget that you want get the size
+  Size sizeWidget;//to catch widget value
+  double RichTextHeight;//Height will change according content
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+  }
 
   void _onTapLink() {
     setState(() => _readMore = !_readMore);
+  }
+
+  _afterLayout(_) async {
+    await _getSizes();
+  }
+
+  _getSizes() {
+    final RenderBox renderBoxRed = _keyWidget.currentContext.findRenderObject();
+    sizeWidget = renderBoxRed.size;
+    setState(() {
+      RichTextHeight = sizeWidget.height * 0.80; //first init height
+    });
+  }
+
+  getWidgetHeight() {
+    if (sizeWidget != null)
+      RichTextHeight = sizeWidget.height * 0.80; //customize height here
+    else
+      RichTextHeight =
+          150; //to prevent null value error only, it get the value from getSize
+    return RichTextHeight;
   }
 
   @override
@@ -41,6 +73,26 @@ class ExpandableTextState extends State<ExpandableText> {
         final text = TextSpan(
           text: widget.text,
         );
+        TextPainter textPainter = TextPainter(
+          text: link,
+          textDirection: TextDirection.rtl,
+          maxLines: 5, //max line of html content
+        );
+        textPainter.layout(
+          minWidth: constraints.minWidth,
+          maxWidth: maxWidth,
+        );
+        // Layout and measure text
+        textPainter.text = text;
+        textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
+
+
+
+        if (textPainter.didExceedMaxLines) {
+          _toShowReadMore = true; //more than max lines
+        } else {
+          _toShowReadMore = false; //less than max line
+        }
 
         var textSpan = TextSpan(
           style: TextStyle(
@@ -57,18 +109,23 @@ class ExpandableTextState extends State<ExpandableText> {
         return Column(
           children: [
             ConstrainedBox(
-              constraints: _readMore
-                  ? new BoxConstraints(maxHeight: 200.0)
-                  : new BoxConstraints(),
+              constraints: !_toShowReadMore
+                  ? new BoxConstraints()  //if under 5 lines
+                  : _readMore //for content more than 5 line
+                      ? new BoxConstraints(maxHeight: getWidgetHeight())
+                      : new BoxConstraints(), //onClicked  button
               child: RichText(
+                key: _keyWidget, //key to get size
                 softWrap: true,
                 overflow: TextOverflow.clip,
                 text: textSpan,
               ),
             ),
-            RichText(
-              text: link,
-            ),
+            _toShowReadMore
+                ? RichText(
+                    text: link,
+                  )
+                : Container(),
           ],
         );
       },
